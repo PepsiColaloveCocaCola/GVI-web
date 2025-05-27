@@ -1,0 +1,39 @@
+.custom-popup .leaflet-popup-content-wrapper {
+  background-color: #4e4b41;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.custom-popup .leaflet-popup-tip {
+  background-color: #4e4b41;
+}
+
+.custom-popup .leaflet-popup-content {
+  margin: 8px;
+  line-height: 1.4;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #039141;
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+  transition: background-color 0.3s ease;
+}
+
+.close-button:hover {
+  background-color: #609910;
+} 
