@@ -1,11 +1,19 @@
+.intro-outer {
+  width: 100%;
+  display: block;
+}
+
 .intro-container {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: black;
+  width: 100%;
+  display: block;
+  position: relative;
+}
+
+.intro-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+  vertical-align: bottom;
 }
 
 .image-layer {
@@ -30,4 +38,49 @@
 
 .green:hover {
   transform: scale(1.1);
+}
+
+.intro-section {
+  width: 100%;
+  display: block;
+  position: relative;
+}
+
+.intro-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  vertical-align: top;
+}
+
+.start-button {
+  position: absolute;
+  /* 696/1920 「 36.25%, 877/1080 「 81.2% */
+  left: 36.25%;
+  top: 81.2%;
+  /* 229/1920 「 11.93%, 100/1080 「 9.26% */
+  width: 11.93%;
+  height: 9.26%;
+  min-width: 150px;
+  min-height: 50px;
+  background-color: #03cb94;
+  border: none;
+  border-radius: 30px;
+  color: white;
+  font-size: clamp(16px, 2vw, 24px);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  z-index: 10;
+}
+
+.start-button:hover {
+  background-color: #02b583;
+}
+
+.start-button:active {
+  transform: scale(0.98);
 }

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, GeoJSON, Circle, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './MapSection.css';
+import MovingGif from './MovingGif';
+import gifAnimation from '../assets/电子宠物.gif';
 
 // Add custom popup styles
 const customPopupStyle = {
@@ -25,6 +27,7 @@ const MapSection = () => {
   const [evaluationsList, setEvaluationsList] = useState([]);  // 存储评价列表
   const mapRef = useRef(null);
   const greenLayerRef = useRef(null);
+  const [isFixed, setIsFixed] = useState(false);
 
   // 加载已有评价
   useEffect(() => {
@@ -155,165 +158,211 @@ const MapSection = () => {
     }
   };
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const mapSection = document.querySelector('.map-section');
+      if (mapSection) {
+        const rect = mapSection.getBoundingClientRect();
+        if (rect.top <= 0 && !isFixed) {
+          setIsFixed(true);
+        } else if (rect.top > 0 && isFixed) {
+          setIsFixed(false);
+        }
+      }
+    };
+
+    const preventScroll = (e) => {
+      if (isFixed) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    const mapSection = document.querySelector('.map-section');
+    
+    if (mapSection) {
+      mapSection.addEventListener('wheel', preventScroll, { passive: false });
+      mapSection.addEventListener('touchmove', preventScroll, { passive: false });
+      mapSection.addEventListener('mousewheel', preventScroll, { passive: false });
+      mapSection.addEventListener('DOMMouseScroll', preventScroll, { passive: false });
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (mapSection) {
+        mapSection.removeEventListener('wheel', preventScroll);
+        mapSection.removeEventListener('touchmove', preventScroll);
+        mapSection.removeEventListener('mousewheel', preventScroll);
+        mapSection.removeEventListener('DOMMouseScroll', preventScroll);
+      }
+    };
+  }, [isFixed]);
+
   return (
-    <div style={{ height: '100vh' }}>
-      <MapContainer
-        center={[30.25, 120.16]}
-        zoom={13}
-        style={{ height: '100%', width: '100%', backgroundColor: '#1a0a00'  }}
-        whenCreated={(map) => (mapRef.current = map)}
-      >
+    <section className="map-section">
+      <div className="map-container">
+        <MapContainer
+          center={[30.25, 120.16]}
+          zoom={13}
+          style={{ height: '100%', width: '100%' }}
+          whenCreated={(map) => (mapRef.current = map)}
+          scrollWheelZoom={true}
+        >
+         
+          {roadsData && <GeoJSON data={roadsData} style={{ color: '#2b240d', weight: 2 }} />}
 
-        {roadsData && <GeoJSON data={roadsData} style={{ color: '#2b240d', weight: 2 }} />}
+          {greenspacesData && (
+            <GeoJSON
+              data={greenspacesData}
+              style={{ fillColor: '#039141', color: '#039141', weight: 1, fillOpacity: 0.5 }}
+              onEachFeature={onEachGreenFeature}
+              ref={(ref) => {
+                greenLayerRef.current = ref;
+              }}
+            />
+          )}
 
-        {greenspacesData && (
-          <GeoJSON
-            data={greenspacesData}
-            style={{ fillColor: '#039141', color: '#039141', weight: 1, fillOpacity: 0.5, zIndex: 1 }}
-            onEachFeature={onEachGreenFeature}
-            ref={(ref) => {
-              greenLayerRef.current = ref;
-            }}
-          />
-        )}
+          {pointsData &&
+            pointsData.features.map((pt, i) => {
+              const coords = pt.geometry.coordinates;
+              const value = pt.properties.NDVIhangzhou;
+              if (typeof value !== "number") return null;
+              return (
+                <Circle
+                  key={i}
+                  center={[coords[1], coords[0]]}
+                  radius={100}
+                  pathOptions={{
+                    color: getColorForPoint(value),
+                    fillColor: getColorForPoint(value),
+                    fillOpacity: 0.8,
+                    weight: 0
+                  }}
+                >
+                  <Popup className="custom-popup" closeButton={false}>
+                    <div style={{ color: '#ffffff' }}>
+                      {value.toFixed(2)}
+                    </div>
+                  </Popup>
+                </Circle>
+              );
+            })}
+        </MapContainer>
+      </div>
 
-        {pointsData &&
-          pointsData.features.map((pt, i) => {
-            const coords = pt.geometry.coordinates;
-            const value = pt.properties.NDVIhangzhou;
-            if (typeof value !== "number") return null;
-            return (
-              <Circle
-                key={i}
-                center={[coords[1], coords[0]]}
-                radius={100}  // 实际物理半径（米）
-                pathOptions={{
-                  color: getColorForPoint(value),
-                  fillColor: getColorForPoint(value),
-                  fillOpacity: 0.8,
-                  weight: 0,
-                  zIndex: 999
-                }}
-              >
-                <Popup className="custom-popup" closeButton={false}>
-                  <div style={{ color: '#ffffff' }}>
-                    NDVI: {value.toFixed(2)}
-                  </div>
-                </Popup>
-              </Circle>
-            );
-          })}
-      </MapContainer>
-
-      {/* ?? */}
       {selectedFeature && (
-        <div style={{
-          position: 'absolute',
-          top: 20,
-          right: 20,
-          background: '#4e4b41',
-          padding: '20px',
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-          width: 300,
-          zIndex: 1000,
-          border: '1px solid #3a3832',
-          color: '#e1e1e0'
-        }}>
-          <button 
-            className="close-button"
-            onClick={() => setSelectedFeature(null)}
-          >
-            ×
-          </button>
-          <h3 style={{ 
-            margin: '0 0 15px 0',
-            fontSize: '18px',
-            color: '#e1e1e0',
-            paddingRight: '30px'
-          }}>{selectedFeature.name}</h3>
-          
-          {evaluationsList.length > 0 && (
-            <div style={{
-              marginBottom: '20px',
-              maxHeight: '200px',
-              overflowY: 'auto',
-              border: '1px solid #3a3832',
-              borderRadius: '4px',
-              padding: '10px'
-            }}>
+        <div className="feature-popup">
+          <div style={{
+            position: 'absolute',
+            top: 20,
+            right: 20,
+            background: '#4e4b41',
+            padding: '20px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            width: 300,
+            zIndex: 1000,
+            border: '1px solid #3a3832',
+            color: '#e1e1e0'
+          }}>
+            <button 
+              className="close-button"
+              onClick={() => setSelectedFeature(null)}
+            >
+              ×
+            </button>
+            <h3 style={{ 
+              margin: '0 0 15px 0',
+              fontSize: '18px',
+              color: '#e1e1e0',
+              paddingRight: '30px'
+            }}>{selectedFeature.name}</h3>
+            
+            {evaluationsList.length > 0 && (
+              <div style={{
+                marginBottom: '20px',
+                maxHeight: '200px',
+                overflowY: 'auto',
+                border: '1px solid #3a3832',
+                borderRadius: '4px',
+                padding: '10px'
+              }}>
+                <h4 style={{
+                  margin: '0 0 10px 0',
+                  fontSize: '14px',
+                  color: '#e1e1e0'
+                }}>历史评价：</h4>
+                {evaluationsList.map((evaluation, index) => (
+                  <div key={evaluation.id || index} style={{
+                    padding: '8px',
+                    borderBottom: index < evaluationsList.length - 1 ? '1px solid #3a3832' : 'none',
+                    fontSize: '14px'
+                  }}>
+                    <div style={{ color: '#e1e1e0' }}>{evaluation.comment}</div>
+                    <div style={{ 
+                      fontSize: '12px',
+                      color: '#a8a8a8',
+                      marginTop: '4px'
+                    }}>
+                      {new Date(evaluation.created_at).toLocaleString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div>
               <h4 style={{
                 margin: '0 0 10px 0',
                 fontSize: '14px',
                 color: '#e1e1e0'
-              }}>历史评价：</h4>
-              {evaluationsList.map((evaluation, index) => (
-                <div key={evaluation.id || index} style={{
-                  padding: '8px',
-                  borderBottom: index < evaluationsList.length - 1 ? '1px solid #3a3832' : 'none',
-                  fontSize: '14px'
-                }}>
-                  <div style={{ color: '#e1e1e0' }}>{evaluation.comment}</div>
-                  <div style={{ 
-                    fontSize: '12px',
-                    color: '#a8a8a8',
-                    marginTop: '4px'
-                  }}>
-                    {new Date(evaluation.created_at).toLocaleString()}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div>
-            <h4 style={{
-              margin: '0 0 10px 0',
-              fontSize: '14px',
-              color: '#e1e1e0'
-            }}>添加新评价：</h4>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px'
-            }}>
-              <input
-                value={evaluation}
-                onChange={(e) => setEvaluation(e.target.value)}
-                placeholder="请输入对绿地的评价"
-                style={{
-                  flex: 1,
-                  height: '32px',
-                  padding: '0 10px',
-                  borderRadius: '4px',
-                  border: '1px solid #3a3832',
-                  fontFamily: 'inherit',
-                  fontSize: '14px',
-                  backgroundColor: '#5d5950',
-                  color: '#e1e1e0'
-                }}
-              />
-              <button
-                onClick={handleSubmit}
-                style={{
-                  padding: '8px 16px',
-                  border: '1px solid #3a3832',
-                  borderRadius: '4px',
-                  background: '#5d5950',
-                  cursor: 'pointer',
-                  color: '#e1e1e0',
-                  fontFamily: 'inherit',
-                  fontSize: '14px',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                提交
-              </button>
+              }}>添加新评价：</h4>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}>
+                <input
+                  value={evaluation}
+                  onChange={(e) => setEvaluation(e.target.value)}
+                  placeholder="请输入对绿地的评价"
+                  style={{
+                    flex: 1,
+                    height: '32px',
+                    padding: '0 10px',
+                    borderRadius: '4px',
+                    border: '1px solid #3a3832',
+                    fontFamily: 'inherit',
+                    fontSize: '14px',
+                    backgroundColor: '#5d5950',
+                    color: '#e1e1e0'
+                  }}
+                />
+                <button
+                  onClick={handleSubmit}
+                  style={{
+                    padding: '8px 16px',
+                    border: '1px solid #3a3832',
+                    borderRadius: '4px',
+                    background: '#5d5950',
+                    cursor: 'pointer',
+                    color: '#e1e1e0',
+                    fontFamily: 'inherit',
+                    fontSize: '14px',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  提交
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
-    </div>
+            
+      <MovingGif gifSrc={gifAnimation} />
+    </section>
   );
 };
 

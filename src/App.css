@@ -5,12 +5,11 @@ html, body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   scroll-behavior: smooth; /* 滚动动画效果 */
   background-color: #ffffff;
-  overflow-x: hidden; /* 防止横向滚动条 */
 }
 
 #root {
   width: 100%;
-  height: 100%;
+  position: relative;
 }
 
 /* -------- 页面区块默认样式 -------- */
@@ -28,4 +27,16 @@ section {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.app-container {
+  width: 100%;
+  position: relative;
+  isolation: isolate; /* 创建新的层叠上下文 */
+}
+
+/* 确保地图部分不影响滚动 */
+.app-container > *:not(.map-section) {
+  position: relative;
+  z-index: 0;
 }
