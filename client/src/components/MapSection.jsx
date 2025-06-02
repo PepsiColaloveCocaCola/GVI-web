@@ -35,7 +35,7 @@ const MapSection = () => {
       try {
         if (!selectedFeature?.id) return;
         
-        const response = await fetch(`http://localhost:3001/evaluations/${selectedFeature.id}`);
+        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/evaluations/${selectedFeature.id}`);
         if (response.ok) {
           const data = await response.json();
           setEvaluationsList(data);  // 保存所有评价
@@ -130,7 +130,7 @@ const MapSection = () => {
     if (!selectedFeature || !evaluation.trim()) return;
 
     try {
-      const res = await fetch('http://localhost:3001/evaluate', {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/evaluate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -146,7 +146,7 @@ const MapSection = () => {
 
       alert('评价提交成功 ✅');
       // 重新获取该绿地的评价
-      const evaluationRes = await fetch(`http://localhost:3001/evaluations/${selectedFeature.id}`);
+      const evaluationRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/evaluations/${selectedFeature.id}`);
       if (evaluationRes.ok) {
         const data = await evaluationRes.json();
         if (data.length > 0) {

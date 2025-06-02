@@ -3,16 +3,19 @@ const express = require('express');
 const Database = require('better-sqlite3');
 const cors = require('cors');
 const path = require('path');
+const PORT = process.env.PORT || 3001;
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ['https://你的前端 render 地址', 'http://localhost:3000'], // 本地 + Render 部署的前端
+}));
 app.use(express.json());
 
-// ? 初�?�化数据库（同�?�创建）
+// ? 初始化数据库（同�?�创建）
 const dbPath = path.resolve(__dirname, 'evaluations.db');
 const db = new Database(dbPath);
 
-// ? 创建�?（�?�果不存�?�?
+// ? 创建�?（�?�果不存�?�?
 db.prepare(`
   CREATE TABLE IF NOT EXISTS evaluations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,5 +61,5 @@ app.get('/evaluations/:greenId', (req, res) => {
   }
 });
 
-// ? �?动服�?
-app.listen(3001, () => console.log('Better-SQLite3 Server running on port 3001'));
+// ? �?动服�?
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
