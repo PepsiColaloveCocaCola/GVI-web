@@ -6,7 +6,7 @@ const MovingGif = ({ gifSrc }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const containerRef = useRef(null);
-  const modalRef = useRef(null); // ����ģ̬���ref
+  const modalRef = useRef(null); // 添加模态框的ref
 
   useEffect(() => {
     if (isHovered) return;
@@ -45,7 +45,7 @@ const MovingGif = ({ gifSrc }) => {
     return () => cancelAnimationFrame(animationFrameId);
   }, [isHovered]);
 
-  // ���ӵ���ⲿ�رյ����ļ�����
+  // 添加点击外部关闭弹窗的监听器
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
@@ -80,9 +80,13 @@ const MovingGif = ({ gifSrc }) => {
         <div className="modal-overlay">
           <div 
             className="modal-content"
-            ref={modalRef} // ʹ��ref��ʶ��ģ̬������
+            ref={modalRef} // 使用ref来识别模态框内容
           >
-            <p>? ������Դ��Green Index Project<br />? ��Ȩ��ԭ�������С�</p>
+            <p>本项目使用的数据和地图资料来自以下来源：<br />
+
+            🌿 绿视图图像：基于 百度全景静态图服务（2017年） 获取，图像处理方法参考自 MIT 的 Treepedia 项目。<br />
+            🗺️ 地图数据：基础地图与矢量数据（.shp 文件）均来源于 OpenStreetMap，依据 Open Database License 1.0 授权使用。<br />
+            数据由 Geofabrik 提供，下载时间为 2025 年 4 月 24 日，图层说明详见 官方文档。</p>
           </div>
         </div>
       )}

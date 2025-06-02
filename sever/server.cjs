@@ -7,7 +7,9 @@ const PORT = process.env.PORT || 3001;
 
 const app = express();
 app.use(cors({
-  origin: ['https://你的前端 render 地址', 'http://localhost:3000'], // 本地 + Render 部署的前端
+  origin: ['http://localhost:5173'], // 本地前端 vite 默认端口是 5173
+  methods: ['GET', 'POST'],
+  credentials: true,
 }));
 app.use(express.json());
 
