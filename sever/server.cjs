@@ -7,16 +7,15 @@ const PORT = process.env.PORT || 3001;
 
 const app = express();
 app.use(cors({
-  origin: ['http://localhost:5173'], // 本地前端 vite 默认端口是 5173
+  origin: process.env.CORS_ORIGIN || 'http://localhost:5173', // 修改这一行
   methods: ['GET', 'POST'],
   credentials: true,
 }));
 app.use(express.json());
 
 // ? 初始化数据库（同�?�创建）
-const dbPath = path.resolve(__dirname, 'evaluations.db');
+const dbPath = process.env.DB_PATH || path.resolve(__dirname, 'evaluations.db'); // 修改这一行
 const db = new Database(dbPath);
-
 // ? 创建�?（�?�果不存�?�?
 db.prepare(`
   CREATE TABLE IF NOT EXISTS evaluations (
