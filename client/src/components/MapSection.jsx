@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, GeoJSON, Circle, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './MapSection.css';
 import MovingGif from './MovingGif';
-import gifAnimation from '../assets/电子宠物.gif';
+import gifAnimation from '../assets/elcpet.gif';
 
 // Add custom popup styles
 const customPopupStyle = {
