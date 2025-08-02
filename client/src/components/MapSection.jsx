@@ -226,7 +226,7 @@ const MapSection = () => {
           {pointsData &&
             pointsData.features.map((pt, i) => {
               const coords = pt.geometry.coordinates;
-              const value = pt.properties.NDVIhangzhou;
+              const value = pt.properties.green_view_index;
               if (typeof value !== "number") return null;
               return (
                 <Circle
